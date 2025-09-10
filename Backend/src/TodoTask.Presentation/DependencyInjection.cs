@@ -1,7 +1,7 @@
 ﻿namespace TodoTask.Presentation;
 
 /// <summary>
-/// Конфигурация зависимостей приложения
+/// Конфигурация зависимостей приложения.
 /// </summary>
 public static class DependencyInjection
 {
@@ -9,7 +9,7 @@ public static class DependencyInjection
     /// <summary>
     /// Конфигурация сервисов
     /// </summary>
-    /// <param name="services">Коллекция сервисов</param>
+    /// <param name="services">Коллекция сервисов.</param>
     public static IServiceCollection ConfigureServices(this IServiceCollection services)
     {
         services.AddControllers();
@@ -20,9 +20,9 @@ public static class DependencyInjection
     }
 
     /// <summary>
-    /// Конфигурация конвеера приложения
+    /// Конфигурация конвеера приложения.
     /// </summary>
-    /// <param name="app">Веб-приложение</param>
+    /// <param name="app">Веб-приложение.</param>
     public static void ConfigurePipeline(this WebApplication app)
     {
         if (app.Environment.IsDevelopment())
