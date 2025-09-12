@@ -11,7 +11,20 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TodoTask.Application", "src
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TodoTask.Infrastructure", "src\TodoTask.Infrastructure\TodoTask.Infrastructure.csproj", "{8445D688-BF9A-453A-9381-688EBE2CBD8D}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "General", "General", "{112B1188-CD09-4066-859E-D1A940E6E3D8}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GeneralKernel", "GeneralKernel", "{00B7205A-43DE-47BD-B9DC-14694D9BE16B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TodoTask.GeneralKernel.Database", "src\GeneralKernel\TodoTask.GeneralKernel.Database\TodoTask.GeneralKernel.Database.csproj", "{98934E60-9BE1-4111-B449-C0CD5BF76E74}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TodoTask.Contracts", "src\TodoTask.Contracts\TodoTask.Contracts\TodoTask.Contracts.csproj", "{E9571FB0-CF50-407C-A2F5-58A9F484B4D5}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{00020836-AF20-4CC6-9478-6C5139BF4CD8}"
+	ProjectSection(SolutionItems) = preProject
+		compose.yaml = compose.yaml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{D36F9DEC-6B6D-431D-A606-0494A4C6B458}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TodoTask.Domain.UnitTests", "src\Tests\TodoTask.Domain.UnitTests\TodoTask.Domain.UnitTests.csproj", "{16E03199-F631-4268-A131-705E33EF9737}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -38,5 +51,21 @@ Global
 		{8445D688-BF9A-453A-9381-688EBE2CBD8D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8445D688-BF9A-453A-9381-688EBE2CBD8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8445D688-BF9A-453A-9381-688EBE2CBD8D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{98934E60-9BE1-4111-B449-C0CD5BF76E74}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{98934E60-9BE1-4111-B449-C0CD5BF76E74}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{98934E60-9BE1-4111-B449-C0CD5BF76E74}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{98934E60-9BE1-4111-B449-C0CD5BF76E74}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E9571FB0-CF50-407C-A2F5-58A9F484B4D5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E9571FB0-CF50-407C-A2F5-58A9F484B4D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E9571FB0-CF50-407C-A2F5-58A9F484B4D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E9571FB0-CF50-407C-A2F5-58A9F484B4D5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{16E03199-F631-4268-A131-705E33EF9737}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{16E03199-F631-4268-A131-705E33EF9737}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{16E03199-F631-4268-A131-705E33EF9737}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{16E03199-F631-4268-A131-705E33EF9737}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{98934E60-9BE1-4111-B449-C0CD5BF76E74} = {00B7205A-43DE-47BD-B9DC-14694D9BE16B}
+		{16E03199-F631-4268-A131-705E33EF9737} = {D36F9DEC-6B6D-431D-A606-0494A4C6B458}
 	EndGlobalSection
 EndGlobal
