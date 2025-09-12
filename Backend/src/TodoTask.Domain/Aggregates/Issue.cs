@@ -1,6 +1,7 @@
 ﻿using TodoTask.Domain.Entities;
 using TodoTask.Domain.Enums;
 using TodoTask.Domain.Exceptions;
+using TodoTask.Domain.ValueObjects;
 
 namespace TodoTask.Domain.Aggregates;
 
@@ -17,7 +18,7 @@ public class Issue
     /// <summary>
     /// Идентификатор пользователя который создал задачу.
     /// </summary>
-    public Guid UserId { get; }
+    public Guid UserId { get; private set; }
 
     /// <summary>
     /// Статус задачи.
@@ -30,19 +31,19 @@ public class Issue
     public IssuePriority Priority { get; private set; }
 
     /// <summary>
-    /// Идентификатор пользователя которому принадлежит задача.
+    /// Идентификатор исполнителя задачи.
     /// </summary>
     public Guid? ExecutorId { get; private set; }
 
     /// <summary>
     /// Название задачи.
     /// </summary>
-    public string Title { get; private set; }
+    public Title Title { get; private set; }
 
     /// <summary>
     /// Описание задачи.
     /// </summary>
-    public string? Description { get; private set; }
+    public Description Description { get; private set; }
 
     /// <summary>
     /// Дата создания задачи.
@@ -59,7 +60,6 @@ public class Issue
     /// </summary>
     public Guid? ParentIssueId { get; private set; }
 
-
     private readonly List<Issue> _subIssues = [];
 
     /// <summary>
@@ -74,26 +74,26 @@ public class Issue
     /// </summary>
     public virtual ICollection<RelationIssue> RelatedIssues => _relatedIssues.AsReadOnly();
 
-
     /// <summary>
     /// Приватный конструктор, который используется в фабричном методе.
     /// </summary>
     private Issue(
-        Guid issueId,
+        Guid id,
         Guid userId,
         IssueStatus status,
         IssuePriority priority,
         Guid? executorId,
-        string title,
-        string? description)
+        Title title,
+        Description description)
     {
-        Id = issueId;
+        Id = id;
         UserId = userId;
         Status = status;
         Priority = priority;
         ExecutorId = executorId;
         Title = title;
         Description = description;
+        
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = DateTime.UtcNow;
     }
@@ -101,31 +101,32 @@ public class Issue
     /// <summary>
     /// Фабричный метод для создания нового экземпляра <see cref="Issue"/>.
     /// </summary>
-    /// <param name="issueId">Идентификатор задачи.</param>
+    /// <param name="id">Идентификатор задачи.</param>
     /// <param name="userId">Идентификатор создателя задачи.</param>
     /// <param name="status">Статус задачи.</param>
     /// <param name="priority">Приоритет задачи.</param>
-    /// <param name="executorId">Идентификатор исполнителя задачи.</param>
+    /// <param name="executorIssueId">Идентификатор исполнителя задачи.</param>
     /// <param name="title">Название задачи.</param>
     /// <param name="description">Описание задачи.</param>
     /// <exception cref="IssueException">
     /// Если название задачи пустое.
     /// </exception>
     public static Issue Create(
-        Guid issueId,
+        Guid id,
         Guid userId,
         IssueStatus status,
         IssuePriority priority,
-        Guid? executorId,
+        Guid? executorIssueId,
         string title,
-        string? description)
+        string description)
     {
-        if (string.IsNullOrWhiteSpace(title))
-        {
-            throw new IssueException("Заголовок задачи не может быть пустым.");
-        }
-
-        return new Issue(issueId, userId, status, priority, executorId, title, description);
+        return new(id, 
+            userId, 
+            status, 
+            priority, 
+            executorIssueId,
+            Title.Of(title),
+            Description.Of(description));
     }
 
     /// <summary>
@@ -146,7 +147,7 @@ public class Issue
     /// <summary>
     /// Удаление исполнителя задачи.
     /// </summary>
-    public void DeleteExecutor()
+    public void RemoveExecutor()
     {
         if (ExecutorId == null)
         {
@@ -165,7 +166,11 @@ public class Issue
     /// <param name="description">Описание задачи.</param>
     /// <param name="priority">Приоритет задачи.</param>
     /// <param name="status">Статус задачи.</param>
-    public void UpdateGeneralInformation(string title, string description, IssuePriority priority, IssueStatus status)
+    public void UpdateGeneralInformation(
+        Title title,
+        Description description,
+        IssuePriority priority,
+        IssueStatus status)
     {
         Title = title;
         Description = description;
@@ -196,31 +201,15 @@ public class Issue
     }
 
     /// <summary>
-    /// Добавление связанной задачи.
+    /// Удаление связи с задачей.
     /// </summary>
-    /// <param name="relation">Задача.</param>
-    /// <exception cref="IssueException">
-    /// Если задачи уже связаны.
-    /// </exception>
-    public void AddRelation(RelationIssue relation)
+    /// <param name="relatedIssueId">Идентификатор связанной задачи.</param>
+    public void RemoveRelation(Guid relatedIssueId)
     {
-        if (_relatedIssues.Any(r => r.RelatedIssueId == relation.RelatedIssueId))
-            throw new IssueException("Задачи уже связаны.");
+        var existing = _relatedIssues.FirstOrDefault(r => r.RelatedId == relatedIssueId);
 
-        _relatedIssues.Add(relation);
-
-        UpdatedAt = DateTime.UtcNow;
-    }
-
-    /// <summary>
-    /// Удаление связанной задачи.
-    /// </summary>
-    /// <param name="relation">Задача.</param>
-    public void RemoveRelation(RelationIssue relation)
-    {
-        var existing = _relatedIssues.FirstOrDefault(r => r.RelatedIssueId == relation.RelatedIssueId);
         if (existing == null)
-            throw new IssueException("Такая связь не существует.");
+            throw new IssueException("Связь не найдена.");
 
         _relatedIssues.Remove(existing);
 
@@ -238,7 +227,8 @@ public class Issue
     {
         if (_subIssues.Any(s => s.Id == subIssue.Id))
             throw new IssueException("Задача уже является подзадачей.");
-
+        
+        
         subIssue.ParentIssueId = Id;
         _subIssues.Add(subIssue);
 
@@ -252,6 +242,7 @@ public class Issue
     public void RemoveSubIssue(Guid subIssueId)
     {
         var existing = _subIssues.FirstOrDefault(s => s.Id == subIssueId);
+
         if (existing == null)
             throw new IssueException("Такая подзадача не существует.");
 

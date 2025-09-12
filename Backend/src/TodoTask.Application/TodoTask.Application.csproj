@@ -7,12 +7,18 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Ardalis.Specification" Version="8.0.0" />
         <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.5.1" />
         <PackageReference Include="Scrutor.AspNetCore" Version="3.3.0" />
     </ItemGroup>
     
     <ItemGroup>
+      <ProjectReference Include="..\GeneralKernel\TodoTask.GeneralKernel.Database\TodoTask.GeneralKernel.Database.csproj" />
       <ProjectReference Include="..\TodoTask.Domain\TodoTask.Domain.csproj" />
+    </ItemGroup>
+    
+    <ItemGroup>
+      <Folder Include="Handlers\Issues\" />
     </ItemGroup>
 
 </Project>

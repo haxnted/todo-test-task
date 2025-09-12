@@ -3,9 +3,9 @@
 /// <summary>
 /// Исключение связанное со связанными задачами.
 /// </summary>
-public class RelatedIssueException : IssueException
+public class RelationIssueException : IssueException
 {
-    public RelatedIssueException(string message) : base(message)
+    public RelationIssueException(string message) : base(message)
     {
     }
 }
