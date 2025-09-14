@@ -27,6 +27,12 @@ public class RelationIssueConfiguration : IEntityTypeConfiguration<RelationIssue
             .HasColumnName("related_id")
             .IsRequired();
 
+        builder.HasOne(r => r.RelatedIssue)
+            .WithMany()
+            .HasForeignKey(r => r.RelatedId)
+            .HasConstraintName("fk_relation_issue_related_issue")
+            .OnDelete(DeleteBehavior.Cascade);
+        
         builder.HasOne(r => r.Issue)
             .WithMany(i => i.RelatedIssues)  
             .HasForeignKey(r => r.IssueId)

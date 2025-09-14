@@ -5,6 +5,13 @@ namespace TodoTask.Infrastructure.Options;
 /// </summary>
 public class JwtOptions
 {
-    public string Secret { get; set; } = null!;
-    public int ExpiryMinutes { get; set; }
+    /// <summary>
+    /// Секретный ключ.
+    /// </summary>
+    public string Secret { get; init; } = null!;
+
+    /// <summary>
+    /// Срок действия токена.
+    /// </summary>
+    public int ExpiryMinutes { get; init; }
 }
