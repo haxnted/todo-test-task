@@ -31,12 +31,6 @@ namespace TodoTask.GeneralKernel.Database
         }
 
         /// <inheritdoc/>
-        public IQueryable<TEntity> AsQueryable()
-        {
-            return DbSet.AsQueryable();
-        }
-
-        /// <inheritdoc/>
         public async Task AddAsync(TEntity entity, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(entity);
@@ -56,21 +50,13 @@ namespace TodoTask.GeneralKernel.Database
             await SaveChangesAsync(cancellationToken);
         }
 
-        /// <inheritdoc/>
-        public IQueryable<TEntity> WithSpecification<TSpec>(TSpec specification)
+        public Task<TEntity?> FirstOrDefaultAsync<TSpec>(TSpec specification, CancellationToken cancellationToken)
             where TSpec : ISpecification<TEntity>
         {
             ArgumentNullException.ThrowIfNull(specification);
 
-            return DbSet.WithSpecification(specification);
-        }
-
-        /// <inheritdoc />
-        public IQueryable<TEntity> Where(Expression<Func<TEntity, bool>> expression)
-        {
-            ArgumentNullException.ThrowIfNull(expression);
-
-            return DbSet.Where(expression);
+            return DbSet.WithSpecification(specification)
+                .FirstOrDefaultAsync(cancellationToken);
         }
 
         /// <inheritdoc />
