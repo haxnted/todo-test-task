@@ -5,17 +5,10 @@ namespace TodoTask.Application.Handlers.Issues.Commands.RemoveRelation;
 /// <summary>
 /// Обработчик команды <see cref="RemoveRelationCommand"/>.
 /// </summary>
-public class RemoveRelationHandler 
+public class RemoveRelationHandler(IIssueService IssueService)
 {
-    private readonly IIssueService _issueService;
-
-    public RemoveRelationHandler(IIssueService issueService)
-    {
-        _issueService = issueService;
-    }
-
     public async Task Handle(RemoveRelationCommand request, CancellationToken cancellationToken)
     {
-        await _issueService.RemoveRelationAsync(request.IssueId, request.RelatedIssueId, cancellationToken);
+        await IssueService.RemoveRelationAsync(request.IssueId, request.RelatedIssueId, cancellationToken);
     }
 }

@@ -10,6 +10,6 @@ public sealed class LoginHandler(IAuthService authService)
 {
     public async Task<LoginResponseDto> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
-        return await authService.LoginAsync(request.Username, cancellationToken);
+        return await authService.LoginAsync(request.Username);
     }
 }

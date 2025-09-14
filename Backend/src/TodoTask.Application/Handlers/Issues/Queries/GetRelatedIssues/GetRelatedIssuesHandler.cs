@@ -6,18 +6,11 @@ namespace TodoTask.Application.Handlers.Issues.Queries.GetRelatedIssues;
 /// <summary>
 /// Обработчик запроса <see cref="GetRelatedIssuesQuery"/>
 /// </summary>
-public class GetRelatedIssuesHandler
+public class GetRelatedIssuesHandler(IIssueService IssueService)
 {
-    private readonly IIssueService _issueService;
-
-    public GetRelatedIssuesHandler(IIssueService issueService)
-    {
-        _issueService = issueService;
-    }
-
     public async Task<IReadOnlyCollection<RelationIssueDto>> Handle(GetRelatedIssuesQuery request, CancellationToken cancellationToken)
     {
-        var issue = await _issueService.GetIssueSnapshotAsync(request.IssueId, cancellationToken);
+        var issue = await IssueService.GetIssueSnapshotAsync(request.IssueId, cancellationToken);
 
         return issue.RelatedIssues
             .Select(r => new RelationIssueDto(r.RelatedId))

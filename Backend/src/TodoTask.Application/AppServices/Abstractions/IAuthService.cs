@@ -7,5 +7,5 @@ namespace TodoTask.Application.AppServices.Abstractions;
 /// </summary>
 public interface IAuthService
 {
-    Task<LoginResponseDto> LoginAsync(string userName, CancellationToken cancellationToken);
+    Task<LoginResponseDto> LoginAsync(string userName);
 }
