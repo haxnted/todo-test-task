@@ -1,4 +1,4 @@
-# Тестовое задание. Система управления задачами (аналог Jira)
+# Тестовое задание для МТС. Система управления задачами (аналог Jira)
 
 ## Основные требования
 
@@ -34,3 +34,10 @@
 - Unit-тесты бизнес-логики  
 - Архитектура в стиле **Clean Architecture** или хотя бы **Onion Architecture**  
 
+Итог после тз:
+.NET 8, Clean Architecture, Domain-Driven Design (DDD)
+Dependency Injection (DI), CQRS, Specifications
+Entity Framework (EF), Migrations, CRUD операции, Unit Tests (покрытие 96%)
+Docker & Docker Compose, Swagger / OpenAPI
+Логирование: консоль, Elasticsearch, Kibana
+Wolverine
