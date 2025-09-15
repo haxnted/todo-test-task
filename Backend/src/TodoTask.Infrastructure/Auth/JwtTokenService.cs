@@ -8,15 +8,8 @@ using TodoTask.Infrastructure.Options;
 namespace TodoTask.Infrastructure.Auth;
 
 /// <inheritdoc />
-public class JwtTokenService : ITokenService
+public class JwtTokenService(JwtOptions JwtOptions) : ITokenService
 {
-    private readonly JwtOptions _options;
-
-    public JwtTokenService(JwtOptions options)
-    {
-        _options = options;
-    }
-
     /// <inheritdoc />
     public string GenerateToken(Guid userId, string username)
     {
@@ -26,11 +19,11 @@ public class JwtTokenService : ITokenService
             new Claim(JwtRegisteredClaimNames.UniqueName, username)
         };
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.Secret));
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtOptions.Secret));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var token = new JwtSecurityToken(claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(_options.ExpiryMinutes),
+            expires: DateTime.UtcNow.AddMinutes(JwtOptions.ExpiryMinutes),
             signingCredentials: creds);
 
         return new JwtSecurityTokenHandler().WriteToken(token);

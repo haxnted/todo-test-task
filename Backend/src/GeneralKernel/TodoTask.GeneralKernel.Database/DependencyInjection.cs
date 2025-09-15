@@ -16,7 +16,7 @@ public static class DependencyInjection
     /// </summary>
     /// <param name="services">Коллекция сервисов.</param>
     /// <returns></returns>
-    public static IServiceCollection AddDatabase<TDbContext, TDbContextConfigurator>(this IServiceCollection services)
+    public static void AddDatabase<TDbContext, TDbContextConfigurator>(this IServiceCollection services)
         where TDbContext : DbContext
         where TDbContextConfigurator : class, IDbContextOptionsConfigurator<TDbContext>
     {
@@ -28,8 +28,6 @@ public static class DependencyInjection
             .AddScoped<DbContext>(sp => sp.GetRequiredService<TDbContext>())
             .AddScoped<ITransactionalExecutor, TransactionalExecutor<TDbContext>>()
             .AddScoped(typeof(IRepository<>), typeof(EntityFrameworkRepository<>));
-
-        return services;
     }
     
     internal static void Configure<TDbContext>(IServiceProvider sp, DbContextOptionsBuilder dbOptions) where TDbContext : DbContext

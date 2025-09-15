@@ -3,7 +3,4 @@
 /// <summary>
 /// Исключение связанное с задачами.
 /// </summary>
-public class IssueException : Exception
-{
-    public IssueException(string message) : base(message) { }
-}
+public class IssueException(string message) : Exception(message);

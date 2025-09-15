@@ -1,5 +1,6 @@
 using FluentAssertions;
 using TodoTask.Domain.Aggregates;
+using TodoTask.Domain.Entities;
 using TodoTask.Domain.Enums;
 using TodoTask.Domain.Exceptions;
 using TodoTask.Domain.ValueObjects;
@@ -13,8 +14,7 @@ public class IssueTests
 {
     private static Issue CreateDefaultIssue()
     {
-        return Issue.Create(
-            Guid.NewGuid(),
+        return Issue.Create(Guid.NewGuid(),
             Guid.NewGuid(),
             IssueStatus.InProgress,
             IssuePriority.Medium,
@@ -30,13 +30,26 @@ public class IssueTests
         var issue = CreateDefaultIssue();
 
         // Assert
-        issue.Id.Should().NotBeEmpty();
-        issue.UserId.Should().NotBeEmpty();
-        issue.Status.Should().Be(IssueStatus.InProgress);
-        issue.Priority.Should().Be(IssuePriority.Medium);
-        issue.ExecutorId.Should().BeNull();
-        issue.Title.Value.Should().Be("Test Title");
-        issue.Description.Value.Should().Be("Test Description");
+        issue.Id.Should()
+            .NotBeEmpty();
+
+        issue.UserId.Should()
+            .NotBeEmpty();
+
+        issue.Status.Should()
+            .Be(IssueStatus.InProgress);
+
+        issue.Priority.Should()
+            .Be(IssuePriority.Medium);
+
+        issue.ExecutorId.Should()
+            .BeNull();
+
+        issue.Title.Value.Should()
+            .Be("Test Title");
+
+        issue.Description.Value.Should()
+            .Be("Test Description");
     }
 
     [Fact]
@@ -47,8 +60,11 @@ public class IssueTests
 
         issue.UpdateExecutor(executorId);
 
-        issue.ExecutorId.Should().Be(executorId);
-        issue.UpdatedAt.Should().BeAfter(issue.CreatedAt);
+        issue.ExecutorId.Should()
+            .Be(executorId);
+
+        issue.UpdatedAt.Should()
+            .BeAfter(issue.CreatedAt);
     }
 
     [Fact]
@@ -60,7 +76,8 @@ public class IssueTests
 
         Action act = () => issue.UpdateExecutor(executorId);
 
-        act.Should().Throw<IssueException>()
+        act.Should()
+            .Throw<IssueException>()
             .WithMessage("Этот исполнитель уже является исполнителем этой задачи.");
     }
 
@@ -73,7 +90,8 @@ public class IssueTests
 
         issue.RemoveExecutor();
 
-        issue.ExecutorId.Should().BeNull();
+        issue.ExecutorId.Should()
+            .BeNull();
     }
 
     [Fact]
@@ -83,7 +101,8 @@ public class IssueTests
 
         Action act = () => issue.RemoveExecutor();
 
-        act.Should().Throw<IssueException>()
+        act.Should()
+            .Throw<IssueException>()
             .WithMessage("Эта задача не имеет исполнителя.");
     }
 
@@ -96,10 +115,17 @@ public class IssueTests
 
         issue.UpdateGeneralInformation(newTitle, newDescription, IssuePriority.High, IssueStatus.InProgress);
 
-        issue.Title.Should().Be(newTitle);
-        issue.Description.Should().Be(newDescription);
-        issue.Priority.Should().Be(IssuePriority.High);
-        issue.Status.Should().Be(IssueStatus.InProgress);
+        issue.Title.Should()
+            .Be(newTitle);
+
+        issue.Description.Should()
+            .Be(newDescription);
+
+        issue.Priority.Should()
+            .Be(IssuePriority.High);
+
+        issue.Status.Should()
+            .Be(IssueStatus.InProgress);
     }
 
     [Fact]
@@ -109,7 +135,8 @@ public class IssueTests
 
         issue.ChangePriority(IssuePriority.Low);
 
-        issue.Priority.Should().Be(IssuePriority.Low);
+        issue.Priority.Should()
+            .Be(IssuePriority.Low);
     }
 
     [Fact]
@@ -119,7 +146,8 @@ public class IssueTests
 
         issue.ChangeStatus(IssueStatus.Done);
 
-        issue.Status.Should().Be(IssueStatus.Done);
+        issue.Status.Should()
+            .Be(IssueStatus.Done);
     }
 
     [Fact]
@@ -129,7 +157,8 @@ public class IssueTests
 
         Action act = () => issue.RemoveRelation(Guid.NewGuid());
 
-        act.Should().Throw<IssueException>()
+        act.Should()
+            .Throw<IssueException>()
             .WithMessage("Связь не найдена.");
     }
 
@@ -141,8 +170,11 @@ public class IssueTests
 
         issue.AddSubIssue(subIssue);
 
-        issue.SubIssues.Should().ContainSingle(s => s.Id == subIssue.Id);
-        subIssue.ParentIssueId.Should().Be(issue.Id);
+        issue.SubIssues.Should()
+            .ContainSingle(s => s.Id == subIssue.Id);
+
+        subIssue.ParentIssueId.Should()
+            .Be(issue.Id);
     }
 
     [Fact]
@@ -154,8 +186,62 @@ public class IssueTests
 
         Action act = () => issue.AddSubIssue(subIssue);
 
-        act.Should().Throw<IssueException>()
+        act.Should()
+            .Throw<IssueException>()
             .WithMessage("Задача уже является подзадачей.");
+    }
+
+    [Fact]
+    public void AddRelation_ShouldAddSuccessfully()
+    {
+        var issue = CreateDefaultIssue();
+        var relatedIssueId = Guid.NewGuid();
+
+        var relation = RelationIssue.Create(Guid.NewGuid(), issue.Id, relatedIssueId);
+
+        issue.AddRelation(relation);
+
+        issue.RelatedIssues.Should()
+            .ContainSingle(r => r.RelatedId == relatedIssueId);
+
+        issue.UpdatedAt.Should()
+            .BeAfter(issue.CreatedAt);
+    }
+
+    [Fact]
+    public void AddRelation_ShouldThrow_WhenRelationAlreadyExists()
+    {
+        var issue = CreateDefaultIssue();
+        var relatedIssueId = Guid.NewGuid();
+
+        var relation = RelationIssue.Create(Guid.NewGuid(), issue.Id, relatedIssueId);
+
+        issue.AddRelation(relation);
+
+        Action act = () => issue.AddRelation(relation);
+
+        act.Should()
+            .Throw<IssueException>()
+            .WithMessage("Связь уже существует.");
+    }
+
+    [Fact]
+    public void RemoveRelation_ShouldRemoveSuccessfully()
+    {
+        var issue = CreateDefaultIssue();
+        var relatedIssueId = Guid.NewGuid();
+
+        var relation = RelationIssue.Create(Guid.NewGuid(), issue.Id, relatedIssueId);
+
+        issue.AddRelation(relation);
+
+        issue.RemoveRelation(relatedIssueId);
+
+        issue.RelatedIssues.Should()
+            .BeEmpty();
+
+        issue.UpdatedAt.Should()
+            .BeAfter(issue.CreatedAt);
     }
 
     [Fact]
@@ -167,8 +253,11 @@ public class IssueTests
 
         issue.RemoveSubIssue(subIssue.Id);
 
-        issue.SubIssues.Should().BeEmpty();
-        subIssue.ParentIssueId.Should().BeNull();
+        issue.SubIssues.Should()
+            .BeEmpty();
+
+        subIssue.ParentIssueId.Should()
+            .BeNull();
     }
 
     [Fact]
@@ -178,7 +267,8 @@ public class IssueTests
 
         Action act = () => issue.RemoveSubIssue(Guid.NewGuid());
 
-        act.Should().Throw<IssueException>()
+        act.Should()
+            .Throw<IssueException>()
             .WithMessage("Такая подзадача не существует.");
     }
 }
