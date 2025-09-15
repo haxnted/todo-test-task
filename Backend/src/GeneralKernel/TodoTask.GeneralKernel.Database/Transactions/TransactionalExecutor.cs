@@ -1,47 +1,46 @@
 ﻿using System.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace TodoTask.GeneralKernel.Database.Transactions
-{
-    /// <summary>
-    /// Базовая реализация <see cref="ITransactionalExecutor"/> для <see cref="DbContext"/>.
-    /// </summary>
-    /// <typeparam name="TContext">Тип контекста базы данных.</typeparam>
-    /// <remarks>
-    /// Конструктор.
-    /// </remarks>
-    /// <param name="dbContext">Экземпляр DbContext, с которым будет работать транзакция.</param>
-    public class TransactionalExecutor<TContext>(TContext dbContext) : ITransactionalExecutor
+namespace TodoTask.GeneralKernel.Database.Transactions;
+
+/// <summary>
+/// Базовая реализация <see cref="ITransactionalExecutor"/> для <see cref="DbContext"/>.
+/// </summary>
+/// <typeparam name="TContext">Тип контекста базы данных.</typeparam>
+/// <remarks>
+/// Конструктор.
+/// </remarks>
+/// <param name="dbContext">Экземпляр DbContext, с которым будет работать транзакция.</param>
+public class TransactionalExecutor<TContext>(TContext dbContext) : ITransactionalExecutor
     where TContext : DbContext
+{
+    private readonly TContext _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
+
+    public async Task StartEffect(Func<CancellationToken, Task> action, IsolationLevel isolationLevel, CancellationToken cancellationToken)
     {
-        private readonly TContext _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
+        ArgumentNullException.ThrowIfNull(action);
 
-        public async Task StartEffect(Func<CancellationToken, Task> action, IsolationLevel isolationLevel, CancellationToken cancellationToken)
+        if (_dbContext.Database.CurrentTransaction is not null)
         {
-            ArgumentNullException.ThrowIfNull(action);
+            await action(cancellationToken);
+            return;
+        }
 
-            if (_dbContext.Database.CurrentTransaction is not null)
+        var strategy = _dbContext.Database.CreateExecutionStrategy();
+
+        await strategy.ExecuteAsync(async () =>
+        {
+            await using var transaction = await _dbContext.Database.BeginTransactionAsync(isolationLevel, cancellationToken);
+            try
             {
                 await action(cancellationToken);
-                return;
+                await transaction.CommitAsync(cancellationToken);
             }
-
-            var strategy = _dbContext.Database.CreateExecutionStrategy();
-
-            await strategy.ExecuteAsync(async () =>
+            catch
             {
-                await using var transaction = await _dbContext.Database.BeginTransactionAsync(isolationLevel, cancellationToken);
-                try
-                {
-                    await action(cancellationToken);
-                    await transaction.CommitAsync(cancellationToken);
-                }
-                catch
-                {
-                    await transaction.RollbackAsync(cancellationToken);
-                    throw;
-                }
-            });
-        }
+                await transaction.RollbackAsync(cancellationToken);
+                throw;
+            }
+        });
     }
 }

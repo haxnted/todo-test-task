@@ -70,18 +70,4 @@ public class RelationIssue
         
         return new(id, issueId, relatedIssueId);
     }
-    
-    /// <summary>
-    /// Устанавливает навигационные свойства.
-    /// </summary>
-    /// <param name="issue">Ссылка на задачу.</param>
-    /// <param name="relatedIssue">Ссылка на связанную задачу.</param>
-    /// <exception cref="RelationIssueException">
-    /// Если ссылка на задачу или связанную задачу равна null.
-    /// </exception>
-    public void SetIssueNavigation(Issue issue, Issue relatedIssue)
-    {
-        Issue = issue ?? throw new RelationIssueException("Ссылка на задачу не должна быть null.");
-        RelatedIssue = relatedIssue ?? throw new RelationIssueException("Ссылка на связанную задачу не должна быть null.");;
-    }
 }

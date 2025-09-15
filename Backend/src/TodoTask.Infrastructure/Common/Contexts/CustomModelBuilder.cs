@@ -2,26 +2,25 @@
 using TodoTask.GeneralKernel.Database.Configurations;
 using TodoTask.Infrastructure.Common.Contexts.Configurations;
 
-namespace TodoTask.Infrastructure.Common.Contexts
+namespace TodoTask.Infrastructure.Common.Contexts;
+
+/// <summary>
+/// Сборщик моделей.
+/// </summary>
+public static class CustomModelBuilder
 {
     /// <summary>
-    /// Сборщик моделей.
+    /// Конфигурирует модель EF Core для микросервиса обработки контрактов выгрузки и инфраструктуры.
     /// </summary>
-    public static class CustomModelBuilder
+    /// <param name="modelBuilder">Конфигуратор модели EF Core.</param>
+    public static void OnModelCreating(ModelBuilder modelBuilder)
     {
-        /// <summary>
-        /// Конфигурирует модель EF Core для микросервиса обработки контрактов выгрузки и инфраструктуры.
-        /// </summary>
-        /// <param name="modelBuilder">Конфигуратор модели EF Core.</param>
-        public static void OnModelCreating(ModelBuilder modelBuilder)
-        {
 
-            // Применяем конфигурации доменных агрегатов
-            modelBuilder.ApplyConfiguration(new IssueConfiguration());
-            modelBuilder.ApplyConfiguration(new RelationIssueConfiguration());
+        // Применяем конфигурации доменных агрегатов
+        modelBuilder.ApplyConfiguration(new IssueConfiguration());
+        modelBuilder.ApplyConfiguration(new RelationIssueConfiguration());
 
-            // Настройка типов DateTime по умолчанию в UTC
-            modelBuilder.SetDefaultDateTimeKind(DateTimeKind.Utc);
-        }
+        // Настройка типов DateTime по умолчанию в UTC
+        modelBuilder.SetDefaultDateTimeKind(DateTimeKind.Utc);
     }
 }

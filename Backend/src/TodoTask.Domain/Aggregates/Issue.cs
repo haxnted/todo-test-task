@@ -132,6 +132,9 @@ public class Issue
     /// <summary>
     /// Обновление исполнителя задачи.
     /// </summary>
+    /// <exception cref="IssueException">
+    /// Этот исполнитель уже является исполнителем этой задачи.
+    /// </exception>
     public void UpdateExecutor(Guid executorId)
     {
         if (executorId == ExecutorId)
@@ -147,6 +150,9 @@ public class Issue
     /// <summary>
     /// Удаление исполнителя задачи.
     /// </summary>
+    /// <exception cref="IssueException">
+    /// Если пользователь попытается удалить исполнителя который не назначен.
+    /// </exception>
     public void RemoveExecutor()
     {
         if (ExecutorId == null)
@@ -201,9 +207,30 @@ public class Issue
     }
 
     /// <summary>
+    /// Добавляет связь между смежными задачами.
+    /// </summary>
+    /// <param name="relationIssue">Ссылка на смежную задачу.</param>
+    /// <exception cref="IssueException">
+    /// Связь уже существует.
+    /// </exception>
+    public void AddRelation(RelationIssue relationIssue)
+    {
+        if (_relatedIssues.Any(r => r.RelatedId == relationIssue.RelatedId))
+        {
+            throw new IssueException("Связь уже существует.");
+        }
+
+        _relatedIssues.Add(relationIssue);
+        UpdatedAt = DateTime.UtcNow;
+    }
+    
+    /// <summary>
     /// Удаление связи с задачей.
     /// </summary>
     /// <param name="relatedIssueId">Идентификатор связанной задачи.</param>
+    /// <exception cref="IssueException">
+    /// Связь не существует.
+    /// </exception>
     public void RemoveRelation(Guid relatedIssueId)
     {
         var existing = _relatedIssues.FirstOrDefault(r => r.RelatedId == relatedIssueId);

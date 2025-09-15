@@ -6,20 +6,13 @@ namespace TodoTask.Application.Handlers.Issues.Commands.CreateIssue;
 /// Обработчик команды <see cref="CreateIssueCommand"/>.
 /// Добавляет задачу.
 /// </summary>
-public class CreateIssueHandler
+public class CreateIssueHandler(IIssueService IssueService)
 {
-    private readonly IIssueService _issueService;
-
-    public CreateIssueHandler(IIssueService issueService)
-    {
-        _issueService = issueService;
-    }
-
     public async Task Handle(CreateIssueCommand request, CancellationToken cancellationToken)
     {
         var issueId = Guid.NewGuid();
 
-        await _issueService.CreateIssueAsync(issueId,
+        await IssueService.CreateIssueAsync(issueId,
             request.UserId,
             request.Status,
             request.Priority,

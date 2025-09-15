@@ -4,25 +4,15 @@ using TodoTask.Application.DTOs;
 namespace TodoTask.Application.AppServices;
 
 /// <inheritdoc/>
-public class AuthService : IAuthService
+public class AuthService(ITokenService TokenService) : IAuthService
 {
-    private readonly ITokenService _tokenService;
-
-    public AuthService(ITokenService tokenService)
-    {
-        _tokenService = tokenService;
-    }
-
     /// <inheritdoc/>
-    public Task<LoginResponseDto> LoginAsync(string userName, CancellationToken cancellationToken)
+    public Task<LoginResponseDto> LoginAsync(string userName)
     {
         var userId = Guid.NewGuid();
-        var token = _tokenService.GenerateToken(userId, userName);
+        var token = TokenService.GenerateToken(userId, userName);
 
-        var response = new LoginResponseDto()
-        {
-            Token = token
-        };
+        var response = new LoginResponseDto(token);
 
         return Task.FromResult(response);
     }

@@ -1,5 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Distributed;
 using TodoTask.Application.AppServices.Abstractions;
 using TodoTask.Application.Specifications;
 using TodoTask.Domain.Aggregates;
@@ -12,23 +10,10 @@ using TodoTask.GeneralKernel.Database.Abstracts;
 namespace TodoTask.Application.AppServices;
 
 /// <inheritdoc/>
-public sealed class IssueService : IIssueService
+public sealed class IssueService(
+    IRepository<Issue> IssueRepository,
+    IRepository<RelationIssue> RelationIssueRepository) : IIssueService
 {
-    private readonly IRepository<Issue> _issueRepository;
-
-    private readonly IRepository<RelationIssue> _relationIssueRepository;
-
-    
-    private static string CacheKey(Guid issueId) => $"issue:{issueId}";
-
-    public IssueService(IRepository<Issue> issueRepository, 
-                        IRepository<RelationIssue> relationIssueRepository)
-    {
-        _issueRepository = issueRepository;
-        _relationIssueRepository = relationIssueRepository;
-    }
-
-    
     /// <inheritdoc/>
     public async Task CreateIssueAsync(
         Guid issueId,
@@ -40,9 +25,10 @@ public sealed class IssueService : IIssueService
         string description,
         CancellationToken cancellationToken)
     {
-        var issue = Issue.Create(issueId, userId, status, priority, executorId, title, description);
+        var issue = Issue.Create(issueId, userId, status, priority, executorId,
+            title, description);
 
-        await _issueRepository.AddAsync(issue, cancellationToken);
+        await IssueRepository.AddAsync(issue, cancellationToken);
     }
 
     /// <inheritdoc/>
@@ -56,16 +42,15 @@ public sealed class IssueService : IIssueService
     {
         var issueSpecification = new IssueByIdSpecification(issueId);
 
-        var issue = await _issueRepository.WithSpecification(issueSpecification)
-                        .FirstOrDefaultAsync(cancellationToken)
+        var issue = await IssueRepository.FirstOrDefaultAsync(issueSpecification, cancellationToken)
                     ?? throw new IssueException("Задача не найдена.");
 
         var newTitle = Title.Of(title);
         var newDescription = Description.Of(description);
-        
+
         issue.UpdateGeneralInformation(newTitle, newDescription, priority, status);
 
-        await _issueRepository.UpdateAsync(issue, cancellationToken);
+        await IssueRepository.UpdateAsync(issue, cancellationToken);
     }
 
     /// <inheritdoc/>
@@ -76,13 +61,12 @@ public sealed class IssueService : IIssueService
     {
         var issueSpecification = new IssueByIdSpecification(issueId);
 
-        var issue = await _issueRepository.WithSpecification(issueSpecification)
-                        .FirstOrDefaultAsync(cancellationToken)
+        var issue = await IssueRepository.FirstOrDefaultAsync(issueSpecification, cancellationToken)
                     ?? throw new IssueException("Задача не найдена.");
 
         issue.UpdateExecutor(executorId);
 
-        await _issueRepository.UpdateAsync(issue, cancellationToken);
+        await IssueRepository.UpdateAsync(issue, cancellationToken);
     }
 
     /// <inheritdoc/>
@@ -92,14 +76,12 @@ public sealed class IssueService : IIssueService
     {
         var issueSpecification = new IssueByIdSpecification(issueId);
 
-        var issue = await _issueRepository
-                        .WithSpecification(issueSpecification)
-                        .FirstOrDefaultAsync(cancellationToken)
+        var issue = await IssueRepository.FirstOrDefaultAsync(issueSpecification, cancellationToken)
                     ?? throw new IssueException("Задача не найдена.");
 
         issue.RemoveExecutor();
 
-        await _issueRepository.UpdateAsync(issue, cancellationToken);
+        await IssueRepository.UpdateAsync(issue, cancellationToken);
     }
 
     /// <inheritdoc/>
@@ -110,19 +92,17 @@ public sealed class IssueService : IIssueService
     {
         var issueSpecification = new IssueWithDetailsSpecification(issueId);
 
-        var issue = await _issueRepository.WithSpecification(issueSpecification)
-                        .FirstOrDefaultAsync(cancellationToken)
+        var issue = await IssueRepository.FirstOrDefaultAsync(issueSpecification, cancellationToken)
                     ?? throw new IssueException("Задача не найдена.");
 
         var subIssueSpecification = new IssueByIdSpecification(subIssueId);
 
-        var subIssue = await _issueRepository.WithSpecification(subIssueSpecification)
-                           .FirstOrDefaultAsync(cancellationToken)
-                       ?? throw new IssueException("Подзадача не найдена.");
+        var subIssue = await IssueRepository.FirstOrDefaultAsync(subIssueSpecification, cancellationToken)
+                       ?? throw new IssueException("Задача не найдена.");
 
         issue.AddSubIssue(subIssue);
 
-        await _issueRepository.UpdateAsync(issue, cancellationToken);
+        await IssueRepository.UpdateAsync(issue, cancellationToken);
     }
 
     /// <inheritdoc/>
@@ -133,19 +113,17 @@ public sealed class IssueService : IIssueService
     {
         var issueSpecification = new IssueWithDetailsSpecification(issueId);
 
-        var issue = await _issueRepository.WithSpecification(issueSpecification)
-                        .FirstOrDefaultAsync(cancellationToken)
+        var issue = await IssueRepository.FirstOrDefaultAsync(issueSpecification, cancellationToken)
                     ?? throw new IssueException("Задача не найдена.");
 
         var subIssueSpecification = new IssueByIdSpecification(subIssueId);
 
-        var subIssue = await _issueRepository.WithSpecification(subIssueSpecification)
-                           .FirstOrDefaultAsync(cancellationToken)
-                       ?? throw new IssueException("Подзадача не найдена.");
+        var subIssue = await IssueRepository.FirstOrDefaultAsync(subIssueSpecification, cancellationToken)
+                       ?? throw new IssueException("Задача не найдена.");
 
         issue.RemoveSubIssue(subIssue.Id);
 
-        await _issueRepository.UpdateAsync(issue, cancellationToken);
+        await IssueRepository.UpdateAsync(issue, cancellationToken);
     }
 
     /// <inheritdoc/>
@@ -154,23 +132,27 @@ public sealed class IssueService : IIssueService
         Guid relatedIssueId,
         CancellationToken cancellationToken)
     {
-        var issue = await _issueRepository.WithSpecification(new IssueWithDetailsSpecification(issueId))
-                        .FirstOrDefaultAsync(cancellationToken)
+        var issueSpecification = new IssueWithDetailsSpecification(issueId);
+
+        var issue = await IssueRepository.FirstOrDefaultAsync(issueSpecification, cancellationToken)
                     ?? throw new IssueException("Задача не найдена.");
 
-        var relatedIssue = await _issueRepository.WithSpecification(new IssueByIdSpecification(relatedIssueId))
-                               .FirstOrDefaultAsync(cancellationToken)
+        var relatedIssueSpecification = new IssueByIdSpecification(relatedIssueId);
+
+        var relatedIssue = await IssueRepository.FirstOrDefaultAsync(relatedIssueSpecification, cancellationToken)
                            ?? throw new IssueException("Связанная задача не найдена.");
 
         if (issue.RelatedIssues.Any(r => r.RelatedId == relatedIssueId))
             throw new IssueException("Задачи уже связаны.");
 
         var relation = RelationIssue.Create(Guid.NewGuid(), issue.Id, relatedIssue.Id);
-        relation.SetIssueNavigation(issue, relatedIssue);
-        
-        await _relationIssueRepository.AddAsync(relation, cancellationToken);
-    }
 
+        issue.AddRelation(relation);
+        
+        await RelationIssueRepository.AddAsync(relation, cancellationToken);
+        
+        await IssueRepository.UpdateAsync(issue, cancellationToken);
+    }
 
     /// <inheritdoc/>
     public async Task RemoveRelationAsync(
@@ -180,13 +162,12 @@ public sealed class IssueService : IIssueService
     {
         var issueSpecification = new IssueWithDetailsSpecification(issueId);
 
-        var issue = await _issueRepository.WithSpecification(issueSpecification)
-                        .FirstOrDefaultAsync(cancellationToken)
+        var issue = await IssueRepository.FirstOrDefaultAsync(issueSpecification, cancellationToken)
                     ?? throw new IssueException("Задача не найдена.");
 
         issue.RemoveRelation(relatedIssueId);
 
-        await _issueRepository.UpdateAsync(issue, cancellationToken);
+        await IssueRepository.UpdateAsync(issue, cancellationToken);
     }
 
     /// <inheritdoc/>
@@ -196,8 +177,7 @@ public sealed class IssueService : IIssueService
     {
         var issueSpecification = new IssueWithDetailsSpecification(issueId);
 
-        var issue = await _issueRepository.WithSpecification(issueSpecification)
-                        .FirstOrDefaultAsync(cancellationToken)
+        var issue = await IssueRepository.FirstOrDefaultAsync(issueSpecification, cancellationToken)
                     ?? throw new IssueException("Задача не найдена.");
 
         return issue;
@@ -210,10 +190,9 @@ public sealed class IssueService : IIssueService
     {
         var issueSpecification = new IssueWithDetailsSpecification(issueId);
 
-        var issue = await _issueRepository.WithSpecification(issueSpecification)
-                        .FirstOrDefaultAsync(cancellationToken)
+        var issue = await IssueRepository.FirstOrDefaultAsync(issueSpecification, cancellationToken)
                     ?? throw new IssueException("Задача не найдена.");
 
-        await _issueRepository.RemoveAsync(issue, cancellationToken);
+        await IssueRepository.RemoveAsync(issue, cancellationToken);
     }
 }
