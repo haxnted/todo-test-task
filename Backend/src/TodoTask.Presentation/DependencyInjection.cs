@@ -14,6 +14,7 @@ using TodoTask.Infrastructure.Auth;
 using TodoTask.Infrastructure.Common.Configurators;
 using TodoTask.Infrastructure.Common.Contexts;
 using TodoTask.Infrastructure.Options;
+using TodoTask.Presentation.Middlewares;
 using Wolverine;
 
 namespace TodoTask.Presentation;
@@ -57,9 +58,13 @@ public static class DependencyInjection
     /// <param name="services">Коллекция сервисов.</param>
     public static void ConfigureLogging(this IServiceCollection services)
     {
-        var assemblyName = Assembly.GetExecutingAssembly().GetName().Name ?? "app";
+        var assemblyName = Assembly.GetExecutingAssembly()
+                               .GetName()
+                               .Name
+                           ?? "app";
+
         var indexFormat = $"{assemblyName.ToLower().Replace(".", "-")}-{DateTime.UtcNow:yyyy-MM-dd}";
-        
+
         Log.Logger = new LoggerConfiguration()
             .Enrich.FromLogContext()
             .WriteTo.Console()
@@ -76,7 +81,7 @@ public static class DependencyInjection
 
         services.AddSerilog();
     }
-    
+
     /// <summary>
     /// Добавление поля авторизации в Swagger.
     /// </summary>
@@ -149,6 +154,7 @@ public static class DependencyInjection
             app.UseSwaggerUI();
         }
 
+        app.UseMiddleware<ErrorMiddleware>();
         app.UseHttpsRedirection();
         app.UseAuthorization();
         app.MapControllers();

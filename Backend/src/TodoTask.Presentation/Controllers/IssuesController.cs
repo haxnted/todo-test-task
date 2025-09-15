@@ -24,15 +24,8 @@ namespace TodoTask.Presentation.Controllers;
 /// </summary>
 [ApiController]
 [Route("issues")]
-public class IssuesController : ControllerBase
+public class IssuesController(IMessageBus MessageBus) : ControllerBase
 {
-    private readonly IMessageBus _bus;
-
-    public IssuesController(IMessageBus bus)
-    {
-        _bus = bus;
-    }
-
     /// <summary>
     /// Создаёт новую задачу.
     /// </summary>
@@ -50,7 +43,7 @@ public class IssuesController : ControllerBase
             request.Title,
             request.Description);
 
-        await _bus.InvokeAsync(command, cancellationToken);
+        await MessageBus.InvokeAsync(command, cancellationToken);
 
         return Ok();
     }
@@ -72,7 +65,7 @@ public class IssuesController : ControllerBase
             status,
             priority);
 
-        await _bus.InvokeAsync(command, cancellationToken);
+        await MessageBus.InvokeAsync(command, cancellationToken);
 
         return Ok();
     }
@@ -86,7 +79,7 @@ public class IssuesController : ControllerBase
     public async Task<IActionResult> DeleteIssue(Guid issueId, CancellationToken cancellationToken)
     {
         var command = new DeleteIssueCommand(issueId);
-        await _bus.InvokeAsync(command, cancellationToken);
+        await MessageBus.InvokeAsync(command, cancellationToken);
 
         return Ok();
     }
@@ -102,7 +95,7 @@ public class IssuesController : ControllerBase
         var command = new AssignExecutorCommand(issueId,
             request.ExecutorId);
 
-        await _bus.InvokeAsync(command, cancellationToken);
+        await MessageBus.InvokeAsync(command, cancellationToken);
 
         return Ok();
     }
@@ -117,7 +110,7 @@ public class IssuesController : ControllerBase
     {
         var command = new RemoveExecutorCommand(issueId);
 
-        await _bus.InvokeAsync(command, cancellationToken);
+        await MessageBus.InvokeAsync(command, cancellationToken);
 
         return Ok();
     }
@@ -131,7 +124,7 @@ public class IssuesController : ControllerBase
     public async Task<IActionResult> AddSubIssue(Guid issueId, AddSubIssueRequest request, CancellationToken cancellationToken)
     {
         var command = new AddSubIssueCommand(issueId, request.SubIssueId);
-        await _bus.InvokeAsync(command, cancellationToken);
+        await MessageBus.InvokeAsync(command, cancellationToken);
 
         return Ok();
     }
@@ -145,7 +138,7 @@ public class IssuesController : ControllerBase
     public async Task<IActionResult> RemoveSubIssue(Guid issueId, Guid subIssueId, CancellationToken cancellationToken)
     {
         var command = new RemoveSubIssueCommand(issueId, subIssueId);
-        await _bus.InvokeAsync(command, cancellationToken);
+        await MessageBus.InvokeAsync(command, cancellationToken);
 
         return Ok();
     }
@@ -159,7 +152,7 @@ public class IssuesController : ControllerBase
     public async Task<IActionResult> AddRelation(Guid issueId, AddRelationRequest request, CancellationToken cancellationToken)
     {
         var command = new AddRelationCommand(issueId, request.RelationId);
-        await _bus.InvokeAsync(command, cancellationToken);
+        await MessageBus.InvokeAsync(command, cancellationToken);
 
         return Ok();
     }
@@ -173,7 +166,7 @@ public class IssuesController : ControllerBase
     public async Task<IActionResult> RemoveRelation(Guid issueId, Guid relatedIssueId, CancellationToken cancellationToken)
     {
         var command = new RemoveRelationCommand(issueId, relatedIssueId);
-        await _bus.InvokeAsync(command, cancellationToken);
+        await MessageBus.InvokeAsync(command, cancellationToken);
 
         return Ok();
     }
@@ -186,7 +179,7 @@ public class IssuesController : ControllerBase
     {
         var query = new GetIssueQuery(issueId);
         
-        var result = await _bus.InvokeAsync<IssueDto>(query, cancellationToken);
+        var result = await MessageBus.InvokeAsync<IssueDto>(query, cancellationToken);
 
         return Ok(result);
     }
@@ -198,7 +191,7 @@ public class IssuesController : ControllerBase
     public async Task<ActionResult<IReadOnlyCollection<RelationIssueDto>>> GetRelatedIssues(Guid issueId, CancellationToken cancellationToken)
     {
         var query = new GetRelatedIssuesQuery(issueId);
-        var result = await _bus.InvokeAsync<IReadOnlyCollection<RelationIssueDto>>(query, cancellationToken);
+        var result = await MessageBus.InvokeAsync<IReadOnlyCollection<RelationIssueDto>>(query, cancellationToken);
         return Ok(result);
     }
 
@@ -209,7 +202,7 @@ public class IssuesController : ControllerBase
     public async Task<ActionResult<IReadOnlyCollection<SubIssueDto>>> GetSubIssues(Guid issueId, CancellationToken cancellationToken)
     {
         var query = new GetSubIssuesQuery(issueId);
-        var result = await _bus.InvokeAsync<IReadOnlyCollection<SubIssueDto>>(query, cancellationToken);
+        var result = await MessageBus.InvokeAsync<IReadOnlyCollection<SubIssueDto>>(query, cancellationToken);
         return Ok(result);
     }
 }
