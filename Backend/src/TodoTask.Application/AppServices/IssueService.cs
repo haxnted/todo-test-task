@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using TodoTask.Application.AppServices.Abstractions;
 using TodoTask.Application.Specifications;
 using TodoTask.Domain.Aggregates;
@@ -12,7 +13,8 @@ namespace TodoTask.Application.AppServices;
 /// <inheritdoc/>
 public sealed class IssueService(
     IRepository<Issue> IssueRepository,
-    IRepository<RelationIssue> RelationIssueRepository) : IIssueService
+    IRepository<RelationIssue> RelationIssueRepository,
+    ILogger<IssueService> Logger) : IIssueService
 {
     /// <inheritdoc/>
     public async Task CreateIssueAsync(
@@ -51,6 +53,8 @@ public sealed class IssueService(
         issue.UpdateGeneralInformation(newTitle, newDescription, priority, status);
 
         await IssueRepository.UpdateAsync(issue, cancellationToken);
+        
+        Logger.LogInformation("Задача {IssueId} успешно обновлена", issueId);
     }
 
     /// <inheritdoc/>
@@ -67,6 +71,8 @@ public sealed class IssueService(
         issue.UpdateExecutor(executorId);
 
         await IssueRepository.UpdateAsync(issue, cancellationToken);
+        
+        Logger.LogInformation("Исполнитель {ExecutorId} успешно назначен задаче {IssueId}", executorId, issueId);
     }
 
     /// <inheritdoc/>
@@ -82,6 +88,8 @@ public sealed class IssueService(
         issue.RemoveExecutor();
 
         await IssueRepository.UpdateAsync(issue, cancellationToken);
+        
+        Logger.LogInformation("Исполнитель успешно удалён у задачи {IssueId}", issueId);
     }
 
     /// <inheritdoc/>
@@ -103,6 +111,8 @@ public sealed class IssueService(
         issue.AddSubIssue(subIssue);
 
         await IssueRepository.UpdateAsync(issue, cancellationToken);
+        
+        Logger.LogInformation("Подзадача {SubIssueId} успешно добавлена к задаче {IssueId}", subIssueId, issueId);
     }
 
     /// <inheritdoc/>
@@ -124,6 +134,8 @@ public sealed class IssueService(
         issue.RemoveSubIssue(subIssue.Id);
 
         await IssueRepository.UpdateAsync(issue, cancellationToken);
+        
+        Logger.LogInformation("Подзадача {SubIssueId} успешно удалена из задачи {IssueId}", subIssueId, issueId);
     }
 
     /// <inheritdoc/>
@@ -152,6 +164,8 @@ public sealed class IssueService(
         await RelationIssueRepository.AddAsync(relation, cancellationToken);
         
         await IssueRepository.UpdateAsync(issue, cancellationToken);
+        
+        Logger.LogInformation("Связь между задачами {IssueId} и {RelatedIssueId} успешно добавлена", issueId, relatedIssueId);
     }
 
     /// <inheritdoc/>
@@ -168,6 +182,8 @@ public sealed class IssueService(
         issue.RemoveRelation(relatedIssueId);
 
         await IssueRepository.UpdateAsync(issue, cancellationToken);
+        
+        Logger.LogInformation("Связь между задачами {IssueId} и {RelatedIssueId} успешно удалена", issueId, relatedIssueId);
     }
 
     /// <inheritdoc/>
@@ -194,5 +210,7 @@ public sealed class IssueService(
                     ?? throw new IssueException("Задача не найдена.");
 
         await IssueRepository.RemoveAsync(issue, cancellationToken);
+        
+        Logger.LogInformation("Задача {IssueId} успешно удалена", issueId);
     }
 }
