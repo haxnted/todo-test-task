@@ -32,6 +32,16 @@ public interface IRepository<TEntity>
     /// <returns>Первая сущность или null.</returns>
     Task<TEntity?> FirstOrDefaultAsync<TSpec>(TSpec specification, CancellationToken cancellationToken)
         where TSpec : ISpecification<TEntity>;
+    
+    /// <summary>
+    /// Возвращает все сущности, соответствующую спецификации.
+    /// </summary>
+    /// <typeparam name="TSpec">Тип спецификации.</typeparam>
+    /// <param name="specification">Спецификация.</param>
+    /// <param name="cancellationToken">Токен отмены.</param>
+    /// <returns>Первая сущность или null.</returns>
+    Task<IReadOnlyList<TEntity>> GetAll<TSpec>(TSpec specification, CancellationToken cancellationToken)
+        where TSpec : ISpecification<TEntity>;
 
     /// <summary>
     /// Обновляет данные сущности.

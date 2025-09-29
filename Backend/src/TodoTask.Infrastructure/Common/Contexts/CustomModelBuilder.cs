@@ -10,7 +10,7 @@ namespace TodoTask.Infrastructure.Common.Contexts;
 public static class CustomModelBuilder
 {
     /// <summary>
-    /// Конфигурирует модель EF Core для микросервиса обработки контрактов выгрузки и инфраструктуры.
+    /// Конфигурирует модель EF Core инфраструктуры.
     /// </summary>
     /// <param name="modelBuilder">Конфигуратор модели EF Core.</param>
     public static void OnModelCreating(ModelBuilder modelBuilder)

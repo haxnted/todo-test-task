@@ -9,6 +9,7 @@ using TodoTask.Application.Handlers.Issues.Commands.RemoveExecutor;
 using TodoTask.Application.Handlers.Issues.Commands.RemoveRelation;
 using TodoTask.Application.Handlers.Issues.Commands.RemoveSubIssue;
 using TodoTask.Application.Handlers.Issues.Commands.UpdateIssue;
+using TodoTask.Application.Handlers.Issues.Queries.GetAllIssues;
 using TodoTask.Application.Handlers.Issues.Queries.GetIssue;
 using TodoTask.Application.Handlers.Issues.Queries.GetRelatedIssues;
 using TodoTask.Application.Handlers.Issues.Queries.GetSubIssues;
@@ -175,11 +176,24 @@ public class IssuesController(IMessageBus MessageBus) : ControllerBase
     /// Получить задачу по идентификатору
     /// </summary>
     [HttpGet("{issueId:guid}")]
-    public async Task<ActionResult<IssueDto>> GetIssue(Guid issueId, CancellationToken cancellationToken)
+    public async Task<ActionResult<IssueDto>> Get(Guid issueId, CancellationToken cancellationToken)
     {
         var query = new GetIssueQuery(issueId);
         
         var result = await MessageBus.InvokeAsync<IssueDto>(query, cancellationToken);
+
+        return Ok(result);
+    }
+
+    [HttpGet("paginate")]
+    public async Task<IActionResult> GetWithPagination(
+        [FromQuery] int pageIndex = 1,
+        [FromQuery] int pageSize = 10,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await MessageBus.InvokeAsync<IReadOnlyList<IssueDto>>(
+            new GetIssuesWithPaginationQuery(pageIndex, pageSize),
+            cancellationToken);
 
         return Ok(result);
     }
