@@ -10,10 +10,12 @@ using TodoTask.Application.AppServices;
 using TodoTask.Application.AppServices.Abstractions;
 using TodoTask.Application.Handlers.Issues.Commands.CreateIssue;
 using TodoTask.GeneralKernel.Database;
+using TodoTask.GeneralKernel.Database.Abstracts;
 using TodoTask.Infrastructure.Auth;
 using TodoTask.Infrastructure.Common.Configurators;
 using TodoTask.Infrastructure.Common.Contexts;
 using TodoTask.Infrastructure.Options;
+using TodoTask.Infrastructure.Seeders;
 using TodoTask.Presentation.Middlewares;
 using Wolverine;
 
@@ -50,8 +52,19 @@ public static class DependencyInjection
                 .Value);
 
         services.ConfigureLogging();
+
+        services.ConfigureSeeders();
     }
 
+    /// <summary>
+    /// Конфигурирует добавление тестовых данных в базу данных.
+    /// </summary>
+    /// <param name="services">Коллекция сервисов.</param>
+    public static void ConfigureSeeders(this IServiceCollection services)
+    {
+        services.AddScoped<ISeeder, IssueSeeder>();
+    }
+    
     /// <summary>
     /// Конфигурирует логгер.
     /// </summary>

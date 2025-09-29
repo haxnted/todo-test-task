@@ -60,6 +60,16 @@ namespace TodoTask.GeneralKernel.Database
         }
 
         /// <inheritdoc />
+        public async Task<IReadOnlyList<TEntity>> GetAll<TSpec>(TSpec specification, CancellationToken cancellationToken)
+            where TSpec : ISpecification<TEntity>
+        {
+            ArgumentNullException.ThrowIfNull(specification);
+
+            return await DbSet.WithSpecification(specification)
+                .ToListAsync(cancellationToken);
+        }
+
+        /// <inheritdoc />
         public Task UpdateAsync(TEntity entity, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(entity);

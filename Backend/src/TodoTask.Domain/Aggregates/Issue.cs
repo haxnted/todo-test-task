@@ -93,7 +93,7 @@ public class Issue
         ExecutorId = executorId;
         Title = title;
         Description = description;
-        
+
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = DateTime.UtcNow;
     }
@@ -120,10 +120,10 @@ public class Issue
         string title,
         string description)
     {
-        return new(id, 
-            userId, 
-            status, 
-            priority, 
+        return new(id,
+            userId,
+            status,
+            priority,
             executorIssueId,
             Title.Of(title),
             Description.Of(description));
@@ -223,7 +223,7 @@ public class Issue
         _relatedIssues.Add(relationIssue);
         UpdatedAt = DateTime.UtcNow;
     }
-    
+
     /// <summary>
     /// Удаление связи с задачей.
     /// </summary>
@@ -254,14 +254,35 @@ public class Issue
     {
         if (_subIssues.Any(s => s.Id == subIssue.Id))
             throw new IssueException("Задача уже является подзадачей.");
-        
-        
+
         subIssue.ParentIssueId = Id;
         _subIssues.Add(subIssue);
 
         UpdatedAt = DateTime.UtcNow;
     }
 
+    /// <summary>
+    /// Добавляет список подзадач.
+    /// </summary>
+    /// <param name="subIssues">Список подзадач.</param>
+    /// <exception cref="IssueException">
+    /// Если задача уже является подзадачей.
+    /// </exception>
+    public void AddRangeSubIssues(IEnumerable<Issue> subIssues)
+    {
+        foreach (var subIssue in subIssues)
+        {
+            if (_subIssues.Any(s => s.Id == subIssue.Id))
+                throw new IssueException("Задача уже является подзадачей.");
+
+            subIssue.ParentIssueId = Id;
+
+            _subIssues.Add(subIssue);
+        }
+
+        UpdatedAt = DateTime.UtcNow;
+    }
+    
     /// <summary>
     /// Удаление подзадачи.
     /// </summary>

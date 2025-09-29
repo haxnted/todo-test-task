@@ -53,7 +53,7 @@ public sealed class IssueService(
         issue.UpdateGeneralInformation(newTitle, newDescription, priority, status);
 
         await IssueRepository.UpdateAsync(issue, cancellationToken);
-        
+
         Logger.LogInformation("Задача {IssueId} успешно обновлена", issueId);
     }
 
@@ -71,7 +71,7 @@ public sealed class IssueService(
         issue.UpdateExecutor(executorId);
 
         await IssueRepository.UpdateAsync(issue, cancellationToken);
-        
+
         Logger.LogInformation("Исполнитель {ExecutorId} успешно назначен задаче {IssueId}", executorId, issueId);
     }
 
@@ -88,7 +88,7 @@ public sealed class IssueService(
         issue.RemoveExecutor();
 
         await IssueRepository.UpdateAsync(issue, cancellationToken);
-        
+
         Logger.LogInformation("Исполнитель успешно удалён у задачи {IssueId}", issueId);
     }
 
@@ -111,7 +111,7 @@ public sealed class IssueService(
         issue.AddSubIssue(subIssue);
 
         await IssueRepository.UpdateAsync(issue, cancellationToken);
-        
+
         Logger.LogInformation("Подзадача {SubIssueId} успешно добавлена к задаче {IssueId}", subIssueId, issueId);
     }
 
@@ -134,7 +134,7 @@ public sealed class IssueService(
         issue.RemoveSubIssue(subIssue.Id);
 
         await IssueRepository.UpdateAsync(issue, cancellationToken);
-        
+
         Logger.LogInformation("Подзадача {SubIssueId} успешно удалена из задачи {IssueId}", subIssueId, issueId);
     }
 
@@ -160,11 +160,11 @@ public sealed class IssueService(
         var relation = RelationIssue.Create(Guid.NewGuid(), issue.Id, relatedIssue.Id);
 
         issue.AddRelation(relation);
-        
+
         await RelationIssueRepository.AddAsync(relation, cancellationToken);
-        
+
         await IssueRepository.UpdateAsync(issue, cancellationToken);
-        
+
         Logger.LogInformation("Связь между задачами {IssueId} и {RelatedIssueId} успешно добавлена", issueId, relatedIssueId);
     }
 
@@ -182,7 +182,7 @@ public sealed class IssueService(
         issue.RemoveRelation(relatedIssueId);
 
         await IssueRepository.UpdateAsync(issue, cancellationToken);
-        
+
         Logger.LogInformation("Связь между задачами {IssueId} и {RelatedIssueId} успешно удалена", issueId, relatedIssueId);
     }
 
@@ -200,6 +200,14 @@ public sealed class IssueService(
     }
 
     /// <inheritdoc/>
+    public async Task<IReadOnlyList<Issue>> GetIssuesWithPaginationAsync(int pageIndex, int pageSize,CancellationToken cancellationToken)
+    {
+        var issueSpecification = new IssuesWithDetailsPaginatedSpecification(pageIndex, pageSize);
+
+        return await IssueRepository.GetAll(issueSpecification, cancellationToken);
+    }
+
+    /// <inheritdoc/>
     public async Task DeleteIssueAsync(
         Guid issueId,
         CancellationToken cancellationToken)
@@ -210,7 +218,7 @@ public sealed class IssueService(
                     ?? throw new IssueException("Задача не найдена.");
 
         await IssueRepository.RemoveAsync(issue, cancellationToken);
-        
+
         Logger.LogInformation("Задача {IssueId} успешно удалена", issueId);
     }
 }
