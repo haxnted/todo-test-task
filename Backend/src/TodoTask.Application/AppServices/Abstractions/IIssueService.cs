@@ -89,6 +89,11 @@ public interface IIssueService
         CancellationToken cancellationToken);
 
     /// <summary>
+    /// Получает все задачи с вложенными подзадачами и связанными задачами.
+    /// </summary>
+    Task<IReadOnlyList<Issue>> GetAllIssuesAsync(CancellationToken cancellationToken);
+
+    /// <summary>
     /// Удаляет задачу.
     /// </summary>
     Task DeleteIssueAsync(
