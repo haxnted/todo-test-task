@@ -185,10 +185,15 @@ public class IssuesController(IMessageBus MessageBus) : ControllerBase
         return Ok(result);
     }
 
-    [HttpGet]
-    public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
+    [HttpGet("paginate")]
+    public async Task<IActionResult> GetWithPagination(
+        [FromQuery] int pageIndex = 1,
+        [FromQuery] int pageSize = 10,
+        CancellationToken cancellationToken = default)
     {
-        var result = await MessageBus.InvokeAsync<IReadOnlyList<IssueDto>>(new GetAllIssuesQuery(),cancellationToken);
+        var result = await MessageBus.InvokeAsync<IReadOnlyList<IssueDto>>(
+            new GetIssuesWithPaginationQuery(pageIndex, pageSize),
+            cancellationToken);
 
         return Ok(result);
     }

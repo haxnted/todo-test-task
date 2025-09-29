@@ -200,9 +200,9 @@ public sealed class IssueService(
     }
 
     /// <inheritdoc/>
-    public async Task<IReadOnlyList<Issue>> GetAllIssuesAsync(CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<Issue>> GetIssuesWithPaginationAsync(int pageIndex, int pageSize,CancellationToken cancellationToken)
     {
-        var issueSpecification = new AllIssuesWithDependenciesSpecification();
+        var issueSpecification = new IssuesWithDetailsPaginatedSpecification(pageIndex, pageSize);
 
         return await IssueRepository.GetAll(issueSpecification, cancellationToken);
     }

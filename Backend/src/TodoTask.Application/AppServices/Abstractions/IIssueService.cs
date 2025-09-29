@@ -89,9 +89,12 @@ public interface IIssueService
         CancellationToken cancellationToken);
 
     /// <summary>
-    /// Получает все задачи с вложенными подзадачами и связанными задачами.
+    /// Получает задачи с вложенными подзадачами и связанными задачами с пагинацией.
     /// </summary>
-    Task<IReadOnlyList<Issue>> GetAllIssuesAsync(CancellationToken cancellationToken);
+    Task<IReadOnlyList<Issue>> GetIssuesWithPaginationAsync(
+        int pageIndex,
+        int pageSize,
+        CancellationToken cancellationToken);
 
     /// <summary>
     /// Удаляет задачу.

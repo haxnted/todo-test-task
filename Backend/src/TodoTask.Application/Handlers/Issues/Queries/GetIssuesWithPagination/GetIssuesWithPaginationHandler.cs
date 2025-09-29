@@ -9,9 +9,9 @@ namespace TodoTask.Application.Handlers.Issues.Queries.GetAllIssues;
 /// </summary>
 public class GetAllIssuesHandler(IIssueService IssueService)
 {
-    public async Task<IReadOnlyList<IssueDto>> Handle(GetAllIssuesQuery query, CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<IssueDto>> Handle(GetIssuesWithPaginationQuery query, CancellationToken cancellationToken)
     {
-        var issues = await IssueService.GetAllIssuesAsync(cancellationToken);
+        var issues = await IssueService.GetIssuesWithPaginationAsync(query.PageIndex, query.PageSize,cancellationToken);
 
         var mappedIssues = issues.Select(ToIssueDto)
             .ToList();
